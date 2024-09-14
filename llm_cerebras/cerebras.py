@@ -6,14 +6,19 @@ from typing import Optional, List
 
 @llm.hookimpl
 def register_models(register):
-    print("Registering Cerebras models")  
-    register(CerebrasModel("llama3.1-8b"))
-    register(CerebrasModel("llama3.1-70b"))
+    print("Registering Cerebras models")
+    for model_id in CerebrasModel.model_map.keys():
+        register(CerebrasModel(model_id))
 
 class CerebrasModel(llm.Model):
     can_stream = True
     model_id: str
     api_base = "https://api.cerebras.ai/v1"
+
+    model_map = {
+        "cerebras-llama3.1-8b": "llama3.1-8b",
+        "cerebras-llama3.1-70b": "llama3.1-70b"
+    }
 
     class Options(llm.Options):
         temperature: Optional[float] = Field(
@@ -50,7 +55,7 @@ class CerebrasModel(llm.Model):
         }
 
         data = {
-            "model": self.model_id,
+            "model": self.model_map[self.model_id],
             "messages": messages,
             "stream": stream,
             "temperature": prompt.options.temperature,
@@ -87,4 +92,4 @@ class CerebrasModel(llm.Model):
         messages.append({"role": "user", "content": prompt.prompt})
         return messages
 
-print("llm_cerebras module loaded")  
+print("llm_cerebras module loaded")
