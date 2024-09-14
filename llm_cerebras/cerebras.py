@@ -6,7 +6,6 @@ from typing import Optional, List
 
 @llm.hookimpl
 def register_models(register):
-    print("Registering Cerebras models")
     for model_id in CerebrasModel.model_map.keys():
         register(CerebrasModel(model_id))
 
@@ -91,5 +90,3 @@ class CerebrasModel(llm.Model):
                 ])
         messages.append({"role": "user", "content": prompt.prompt})
         return messages
-
-print("llm_cerebras module loaded")
