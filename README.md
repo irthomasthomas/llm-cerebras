@@ -23,11 +23,11 @@ You'll need to obtain a Cerebras API key. Once you have it, configure the plugin
 
 To use the Cerebras models, run:
 
-    llm -m llama3.1-8b "Your prompt here"
+    llm -m cerebras-llama3.1-8b "Your prompt here"
 
 Or for the 70B model:
 
-    llm -m llama3.1-70b "Your prompt here"
+    llm -m cerebras-llama3.1-70b "Your prompt here"
 
 
 
@@ -40,7 +40,7 @@ The following options are available:
 
 Example usage with options:
 
-    llm -m llama3.1-8b "Your prompt" -o temperature 0.5 -o max_tokens 100
+    llm -m cerebras-llama3.1-8b "Your prompt" -o temperature 0.5 -o max_tokens 100
 
 
 
