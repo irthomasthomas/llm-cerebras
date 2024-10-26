@@ -45,4 +45,4 @@ htmlcov/
 
 .DS_Store
 *.log
-.artefacts
+.artefacts/
