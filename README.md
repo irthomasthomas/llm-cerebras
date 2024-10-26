@@ -14,7 +14,8 @@ Install this plugin in the same environment as [LLM](https://llm.datasette.io/):
 
 
 
-You'll need to obtain a Cerebras API key. Once you have it, configure the plugin like this:
+You'll need to obtain a Cerebras API key following the instructions [here](https://inference-docs.cerebras.ai/quickstart#step-1-set-up-your-api-key).
+Once you have it, configure the plugin like this:
 
     llm keys set cerebras
     
