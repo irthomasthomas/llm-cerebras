@@ -7,7 +7,10 @@ from typing import Optional, List
 @llm.hookimpl
 def register_models(register):
     for model_id in CerebrasModel.model_map.keys():
-        register(CerebrasModel(model_id))
+        aliases = tuple()
+        if model_id == "cerebras-llama3.3-70b":
+            aliases = ("cerebras-llama3.1-70b",)
+        register(CerebrasModel(model_id), aliases=aliases)
 
 class CerebrasModel(llm.Model):
     can_stream = True
@@ -16,7 +19,7 @@ class CerebrasModel(llm.Model):
 
     model_map = {
         "cerebras-llama3.1-8b": "llama3.1-8b",
-        "cerebras-llama3.1-70b": "llama3.1-70b"
+        "cerebras-llama3.3-70b": "llama-3.3-70b"
     }
 
     class Options(llm.Options):
