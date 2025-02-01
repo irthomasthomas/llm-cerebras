@@ -15,8 +15,9 @@ class CerebrasModel(llm.Model):
     api_base = "https://api.cerebras.ai/v1"
 
     model_map = {
-        "cerebras-llama3.1-8b": "llama3.1-8b",
-        "cerebras-llama3.1-70b": "llama3.1-70b"
+    "cerebras-llama3.1-8b": "llama3.1-8b",
+    "cerebras-llama3.1-70b": "llama3.1-70b",
+    "cerebras-deepseek-r1-distill-llama-70b": "DeepSeek-R1-Distill-Llama-70B"
     }
 
     class Options(llm.Options):
