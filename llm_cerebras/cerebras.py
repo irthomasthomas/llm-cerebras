@@ -8,8 +8,6 @@ from typing import Optional, List
 def register_models(register):
     for model_id in CerebrasModel.model_map.keys():
         aliases = tuple()
-        if model_id == "cerebras-llama3.3-70b":
-            aliases = ("cerebras-llama3.1-70b",)
         register(CerebrasModel(model_id), aliases=aliases)
 
 class CerebrasModel(llm.Model):
