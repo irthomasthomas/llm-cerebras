@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "person": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string"},
+        "age": {"type": "integer"},
+        "skills": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["name", "age", "skills"]
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "city": {"type": "string"},
+        "country": {"type": "string"}
+      },
+      "required": ["city", "country"]
+    }
+  },
+  "required": ["person", "location"]
+}
