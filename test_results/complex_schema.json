@@ -1,0 +1,15 @@
+{
+  "person": {
+    "name": "John Doe",
+    "age": 30,
+    "occupation": "Software Developer",
+    "skills": ["Java", "Python", "C++", "JavaScript"],
+    "experience": 5
+  },
+  "location": {
+    "city": "New York",
+    "country": "USA",
+    "latitude": 40.7128,
+    "longitude": -74.0060
+  }
+}
