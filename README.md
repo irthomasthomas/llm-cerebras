@@ -1,61 +1,124 @@
+# llm-cerebras
 
+This is a plugin for [LLM](https://llm.datasette.io/) that adds support for the Cerebras inference API.
 
-[![PyPI](https://img.shields.io/pypi/v/llm-cerebras.svg)](https://pypi.org/project/llm-cerebras/)
-[![Changelog](https://img.shields.io/github/v/release/irthomasthomas/llm-cerebras?include_prereleases&label=changelog)](https://github.com/irthomasthomas/llm-cerebras/releases)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/irthomasthomas/llm-cerebras/blob/main/LICENSE)
+## Installation
 
-llm plugin to prompt Cerebras hosted models.
+Install this plugin in the same environment as LLM.
 
+```bash
+pip install llm-cerebras
+```
 
+## Configuration
 
-Install this plugin in the same environment as [LLM](https://llm.datasette.io/):
+You'll need to provide an API key for Cerebras.
 
-    llm install llm-cerebras
+```bash
+llm keys set cerebras
+```
 
+## Listing available models
 
+```bash
+llm models list | grep cerebras
+# cerebras-llama3.1-8b - Cerebras
+# cerebras-llama3.3-70b - Cerebras
+# cerebras-deepseek-r1-distill-llama-70b - Cerebras
+```
 
-You'll need to obtain a Cerebras API key following the instructions [here](https://inference-docs.cerebras.ai/quickstart#step-1-set-up-your-api-key).
-Once you have it, configure the plugin like this:
+## Schema Support
 
-    llm keys set cerebras
-    
+The llm-cerebras plugin supports schemas for structured output. You can use either compact schema syntax or full JSON Schema:
 
+```bash
+# Using compact schema syntax
+llm -m cerebras-llama3.3-70b 'invent a dog' --schema 'name, age int, breed'
 
+# Using multi-item schema for lists
+llm -m cerebras-llama3.3-70b 'invent three dogs' --schema-multi 'name, age int, breed'
 
-To use the Cerebras models, run:
+# Using full JSON Schema 
+llm -m cerebras-llama3.3-70b 'invent a dog' --schema '{
+  "type": "object",
+  "properties": {
+    "name": {"type": "string"},
+    "age": {"type": "integer"},
+    "breed": {"type": "string"}
+  },
+  "required": ["name", "age", "breed"]
+}'
+```
 
-    llm -m cerebras-llama3.1-8b "Your prompt here"
+### Schema with Descriptions
 
-Or for the 70B model:
+You can add descriptions to your schema fields to guide the model:
 
-    llm -m cerebras-llama3.1-70b "Your prompt here"
+```bash
+llm -m cerebras-llama3.3-70b 'invent a famous scientist' --schema '
+name: the full name including any titles
+field: their primary field of study
+year_born int: year of birth
+year_died int: year of death, can be null if still alive
+achievements: a list of their major achievements
+'
+```
 
+### Creating Schema Templates
 
+You can save schemas as templates for reuse:
 
-The following options are available:
+```bash
+# Create a template
+llm -m cerebras-llama3.3-70b --schema 'title, director, year int, genre' --save movie_template
 
-- `temperature`: Controls randomness. Defaults to 0.7, range 0-1.5.
-- `max_tokens`: The maximum number of tokens to generate.
-- `top_p`: Alternative to temperature for nucleus sampling. Defaults to 1.
-- `seed`: For deterministic sampling.
+# Use the template
+llm -t movie_template 'suggest a sci-fi movie from the 1980s'
+```
 
-Example usage with options:
-
-    llm -m cerebras-llama3.1-8b "Your prompt" -o temperature 0.5 -o max_tokens 100
-
-
+## Development
 
 To set up this plugin locally, first checkout the code. Then create a new virtual environment:
 
-    cd llm-cerebras
-    python3 -m venv venv
-    source venv/bin/activate
+```bash
+cd llm-cerebras
+python -m venv venv
+source venv/bin/activate
+```
 
 Now install the dependencies and test dependencies:
 
-    pip install -e '.[test]'
+```bash
+pip install -e '.[test]'
+```
 
-To run the tests:
+### Running Tests
 
-    pytest
+To run the unit tests:
 
+```bash
+pytest tests/test_cerebras.py tests/test_schema_support.py
+```
+
+To run integration tests (requires a valid API key):
+
+```bash
+pytest tests/test_integration.py
+```
+
+To run automated user workflow tests:
+
+```bash
+pytest tests/test_automated_user.py
+```
+
+You can run specific test types using markers:
+
+```bash
+pytest -m "integration"  # Run only integration tests
+pytest -m "user"         # Run only user workflow tests
+```
+
+## License
+
+Apache 2.0

@@ -1,0 +1,22 @@
+{
+  "items": [
+    {
+      "name": "Eira Shadowglow",
+      "age": 250,
+      "species": "Elf",
+      "occupation": "Ranger"
+    },
+    {
+      "name": "Kael Darkhaven",
+      "age": 35,
+      "species": "Human",
+      "occupation": "Assassin"
+    },
+    {
+      "name": "Lila Earthsong",
+      "age": 120,
+      "species": "Dwarf",
+      "occupation": "Cleric"
+    }
+  ]
+}
