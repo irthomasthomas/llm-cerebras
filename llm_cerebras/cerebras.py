@@ -28,6 +28,7 @@ class CerebrasModel(llm.Model):
     model_map = {
         "cerebras-llama3.1-8b": "llama3.1-8b",
         "cerebras-llama3.3-70b": "llama-3.3-70b",
+        "cerebras-llama-4-scout-17b-16e-instruct": "llama-4-scout-17b-16e-instruct",
         "cerebras-deepseek-r1-distill-llama-70b": "DeepSeek-R1-Distill-Llama-70B",
     }
 

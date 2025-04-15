@@ -22,9 +22,10 @@ llm keys set cerebras
 
 ```bash
 llm models list | grep cerebras
-# cerebras-llama3.1-8b - Cerebras
-# cerebras-llama3.3-70b - Cerebras
-# cerebras-deepseek-r1-distill-llama-70b - Cerebras
+# CerebrasModel: cerebras-llama3.1-8b
+# CerebrasModel: cerebras-llama3.3-70b
+# CerebrasModel: cerebras-llama-4-scout-17b-16e-instruct
+# CerebrasModel: cerebras-deepseek-r1-distill-llama-70b
 ```
 
 ## Schema Support
