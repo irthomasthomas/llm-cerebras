@@ -47,3 +47,5 @@ htmlcov/
 *.log
 .artefacts/.agent
 .agent
+
+.agent/
