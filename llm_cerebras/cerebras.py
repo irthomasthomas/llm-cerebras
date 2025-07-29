@@ -1,6 +1,9 @@
 import llm
 import httpx
 import json
+import os
+import time
+from pathlib import Path
 from pydantic import Field
 from typing import Optional, List, Dict, Any, Union
 import logging
@@ -15,22 +18,158 @@ except ImportError:
 
 @llm.hookimpl
 def register_models(register):
-    for model_id in CerebrasModel.model_map.keys():
+    model_map = CerebrasModel.get_models()
+    for model_id in model_map.keys():
         aliases = tuple()
         register(CerebrasModel(model_id), aliases=aliases)
+
+@llm.hookimpl
+def register_commands(cli):
+    @cli.group()
+    def cerebras():
+        "Commands relating to the llm-cerebras plugin"
+
+    @cerebras.command()
+    def refresh():
+        "Refresh Cerebras models from API"
+        try:
+            models = CerebrasModel.refresh_models()
+            print(f"Refreshed {len(models)} Cerebras models:")
+            for model_id in sorted(models.keys()):
+                print(f"  - {model_id}")
+        except Exception as e:
+            print(f"Error refreshing models: {e}")
+            return 1
+        return 0
 
 class CerebrasModel(llm.Model):
     can_stream = True
     model_id: str
     api_base = "https://api.cerebras.ai/v1"
     supports_schema = True  # Enable schema support
-
-    model_map = {
-        "cerebras-llama3.1-8b": "llama3.1-8b",
-        "cerebras-llama3.3-70b": "llama-3.3-70b",
-        "cerebras-llama-4-scout-17b-16e-instruct": "llama-4-scout-17b-16e-instruct",
-        "cerebras-deepseek-r1-distill-llama-70b": "DeepSeek-R1-Distill-Llama-70B",
-    }
+    
+    # Cache settings
+    _cache_file = None
+    _cache_duration = 24 * 60 * 60  # 24 hours in seconds
+    
+    @classmethod
+    def get_cache_file(cls):
+        """Get the path to the models cache file."""
+        if cls._cache_file is None:
+            cls._cache_file = llm.user_dir() / "cerebras_models.json"
+        return cls._cache_file
+    
+    @classmethod
+    def load_cached_models(cls):
+        """Load models from cache if available and not expired."""
+        cache_file = cls.get_cache_file()
+        
+        if not cache_file.exists():
+            return None
+            
+        try:
+            with open(cache_file, 'r') as f:
+                cache_data = json.load(f)
+            
+            # Check if cache is expired
+            cache_time = cache_data.get('timestamp', 0)
+            if time.time() - cache_time > cls._cache_duration:
+                return None
+                
+            return cache_data.get('models', {})
+        except (json.JSONDecodeError, KeyError, OSError) as e:
+            logging.warning(f"Failed to load cached models: {e}")
+            return None
+    
+    @classmethod
+    def save_models_to_cache(cls, models):
+        """Save models to cache with timestamp."""
+        cache_file = cls.get_cache_file()
+        
+        cache_data = {
+            'timestamp': time.time(),
+            'models': models
+        }
+        
+        try:
+            # Ensure parent directory exists
+            cache_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(cache_file, 'w') as f:
+                json.dump(cache_data, f, indent=2)
+        except OSError as e:
+            logging.warning(f"Failed to save models to cache: {e}")
+    
+    @classmethod
+    def fetch_models_from_api(cls):
+        """Fetch available models from Cerebras API."""
+        try:
+            api_key = llm.get_key("", "cerebras", "CEREBRAS_API_KEY")
+            if not api_key:
+                logging.warning("No Cerebras API key found, using fallback models")
+                raise ValueError("No API key available")
+                
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            url = f"{cls.api_base}/models"
+            logging.info(f"Fetching models from {url}")
+            response = httpx.get(url, headers=headers, timeout=30)
+            response.raise_for_status()
+            
+            api_data = response.json()
+            models = {}
+            
+            # Process the API response to create model mapping
+            if 'data' in api_data:
+                for model in api_data['data']:
+                    model_id = model.get('id', '')
+                    if model_id:
+                        # Create a prefixed version for LLM registration
+                        prefixed_id = f"cerebras-{model_id}"
+                        models[prefixed_id] = model_id
+                        
+                logging.info(f"Successfully fetched {len(models)} models from API")
+            else:
+                logging.warning("No 'data' field in API response")
+            
+            return models
+            
+        except Exception as e:
+            logging.error(f"Failed to fetch models from API: {e}")
+            # Return fallback models if API fails
+            fallback_models = {
+                "cerebras-llama3.1-8b": "llama3.1-8b",
+                "cerebras-llama3.3-70b": "llama-3.3-70b",
+                "cerebras-llama-4-scout-17b-16e-instruct": "llama-4-scout-17b-16e-instruct",
+                "cerebras-deepseek-r1-distill-llama-70b": "DeepSeek-R1-Distill-Llama-70B",
+            }
+            logging.info(f"Using fallback models: {list(fallback_models.keys())}")
+            return fallback_models
+    
+    @classmethod
+    def get_models(cls, refresh=False):
+        """Get models from cache or API."""
+        if not refresh:
+            cached_models = cls.load_cached_models()
+            if cached_models:
+                return cached_models
+        
+        # Fetch from API and cache
+        models = cls.fetch_models_from_api()
+        cls.save_models_to_cache(models)
+        return models
+    
+    @classmethod
+    def refresh_models(cls):
+        """Force refresh models from API."""
+        return cls.get_models(refresh=True)
+    
+    @property
+    def model_map(self):
+        """Get the current model mapping."""
+        return self.get_models()
 
     class Options(llm.Options):
         temperature: Optional[float] = Field(
@@ -67,7 +206,7 @@ class CerebrasModel(llm.Model):
         }
 
         data = {
-            "model": self.model_map[self.model_id],
+            "model": self.model_map.get(self.model_id, self.model_id),
             "messages": messages,
             "stream": stream,
             "temperature": prompt.options.temperature,

@@ -20,13 +20,25 @@ llm keys set cerebras
 
 ## Listing available models
 
+The plugin automatically fetches the latest available models from the Cerebras API and caches them for 24 hours.
+
 ```bash
 llm models list | grep cerebras
 # CerebrasModel: cerebras-llama3.1-8b
 # CerebrasModel: cerebras-llama3.3-70b
 # CerebrasModel: cerebras-llama-4-scout-17b-16e-instruct
-# CerebrasModel: cerebras-deepseek-r1-distill-llama-70b
+# CerebrasModel: cerebras-qwen-3-32b
 ```
+
+## Refreshing models
+
+To get the latest models from the Cerebras API and update the cache:
+
+```bash
+llm cerebras refresh
+```
+
+This will fetch the current list of available models and save them to the cache. The models are automatically cached for 24 hours, so you typically don't need to refresh manually unless you want to check for newly released models.
 
 ## Schema Support
 
