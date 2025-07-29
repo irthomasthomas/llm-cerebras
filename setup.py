@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="llm-cerebras",
-    version="0.1.1",
+    version="0.1.8",
     packages=find_packages(),
     install_requires=[
         "llm",

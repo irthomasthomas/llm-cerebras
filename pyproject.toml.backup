@@ -4,8 +4,9 @@ version = "0.1.8"
 description = "Plugin for LLM adding fast Cerebras inference API support"
 readme = "README.md"
 authors = [{name = "Thomas (Thomasthomas) Hughes"}]
-license = "Apache-2.0"
+license = {text = "Apache-2.0"}
 classifiers = [
+    "License :: OSI Approved :: Apache Software License"
 ]
 dependencies = [
     "llm",
